@@ -1,11 +1,12 @@
+from math import e
 import os
 import numpy as np
 from tqdm import tqdm
-from sklearn import svm
 from typing import Dict
+from sklearn import svm
 from sklearn import datasets
 from compressor import Compressor
-from utils.list_to_chunks import list_to_chunks
+from utils.list_to_chunks import split_data_categories
 from sklearn.model_selection import train_test_split
 
 INITIAL_DICTIONARY_SIZE = 256
@@ -25,11 +26,21 @@ class Lzw_Pattern_Recognizer():
 
     def split_dataset(self):
         self.data = datasets.load_files(self.database_path)
-        x, y = np.array(list_to_chunks(self.data["filenames"], 10)), np.array(
-            self.data["target_names"])
+        data_categories = split_data_categories(self.data["filenames"])
+        x, y = np.array(data_categories["File paths"]), list(
+            data_categories["Categories"])
 
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
-            x, y, test_size=0.5, random_state=0)
+            x, y, train_size=0.2, test_size=0.2)
+
+        clf = svm.SVC(kernel='linear', C=1).fit(self.x_train, self.x_test)
+        print(clf.score(self.x_test, self.y_test))
+
+    def generate_classification_results(self) -> Dict:
+        self.compressed_classification_categories = {}
+
+        for test_slice in tqdm(self.x_test):
+            print(test_slice)
 
     def generate_dictionary_for_database_categories(self) -> Dict:
         self.categories_dictionary = {}
@@ -44,7 +55,7 @@ class Lzw_Pattern_Recognizer():
 
                 original_file = open(file_path, "rb").read()
                 compressor = Compressor(
-                    data=original_file, dictionary=self.categories_dictionary[category], k=16)
+                    data=original_file, dictionary=self.categories_dictionary[category], k=10)
                 compressor_response = compressor.run()
                 self.compression_indices_dictionary[file_path] = compressor_response["indices"]
 
@@ -60,4 +71,6 @@ lzw_pattern_recognizer = Lzw_Pattern_Recognizer(
 )
 
 lzw_pattern_recognizer.split_dataset()
+exit()
 lzw_pattern_recognizer.generate_dictionary_for_database_categories()
+lzw_pattern_recognizer.generate_classification_results()
