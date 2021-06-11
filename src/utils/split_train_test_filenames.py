@@ -13,4 +13,4 @@ def split_train_test_filenames(file_paths: list, labels: list):
         x_test.append([test_image])
         y.append(category)
 
-    return np.array(file_paths), np.array(x_test), np.array(y), np.array(y)
+    return file_paths, x_test, y, y
