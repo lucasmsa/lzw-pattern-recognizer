@@ -11,10 +11,11 @@ class Compressor_Response(TypedDict):
 
 
 class Compressor():
-    def __init__(self, data, dictionary, k):
+    def __init__(self, data, dictionary, k, is_classfication=False):
         self.data = data.decode('latin_1')
         self.dictionary = dictionary
         self.k = pow(2, k)
+        self.is_classfication = is_classfication
 
     def run(self) -> Compressor_Response:
         message_size = len(self.data)-1
@@ -33,7 +34,8 @@ class Compressor():
 
                 symbol = concatenated_symbols
 
-                if concatenated_symbols not in self.dictionary and current_dictionary_value < self.k and len(self.dictionary) < self.k:
+                if concatenated_symbols not in self.dictionary and current_dictionary_value < self.k and len(self.dictionary) < self.k \
+                        and not self.is_classfication:
                     self.dictionary[concatenated_symbols] = current_dictionary_value
                     current_dictionary_value += 1
                     encoded_message.append(
@@ -42,7 +44,7 @@ class Compressor():
                     symbol, encode_data(self.data, idx + 1))
 
             if concatenated_symbols not in self.dictionary:
-                if (current_dictionary_value < self.k) and len(self.dictionary) < self.k:
+                if (current_dictionary_value < self.k) and len(self.dictionary) < self.k and not self.is_classfication:
                     self.dictionary[concatenated_symbols] = current_dictionary_value
                     current_dictionary_value += 1
                 encoded_message.append(
