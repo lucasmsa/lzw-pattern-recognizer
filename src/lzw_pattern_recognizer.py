@@ -5,9 +5,9 @@ from tqdm import trange
 from typing import Dict
 from sklearn import svm
 from colorama import Fore
+from statistics import mean
 from sklearn import datasets
 from compressor import Compressor
-from sklearn.neighbors import KNeighborsClassifier
 from utils.list_to_chunks import split_data_categories
 from utils.split_train_test_filenames import split_train_test_filenames as cross_validation
 
@@ -29,22 +29,13 @@ class Lzw_Pattern_Recognizer():
     def split_dataset(self):
         self.data = datasets.load_files(self.database_path)
         data_categories = split_data_categories(self.data["filenames"])
-        x, y = data_categories["File paths"], list(
-            data_categories["Categories"])
+        x, y = data_categories["File paths"], list(data_categories["Categories"])
 
         self.x_train, self.x_test, self.y_train, self.y_test = cross_validation(
             x, y
         )
 
-    def perform_knn(self):
-        knn = KNeighborsClassifier(n_neighbors=1)
-        knn.fit(self.x_train, self.y_train)
-        print("BATATASSSSSS!!")
-        classification_results = knn.predict(
-            [[9236, 9041, 9222, 9129, 9084, 9216, 9151, 9201, 9083]])
-        print(classification_results)
-
-    def generate_classification_results(self) -> Dict:
+    def generate_classification_results(self):
         self.compressed_classification_categories = {}
 
         progress_bar = trange(len(self.x_train), position=0, leave=True)
@@ -70,15 +61,15 @@ class Lzw_Pattern_Recognizer():
             progress_bar.update(1)
 
         progress_bar.close()
-        self.x_test = self.x_test
+
         print(
             f"X_TRAIN: {self.x_train}, X_TEST: {self.x_test}, Y_TRAIN: {self.y_train}, Y_TEST: {self.y_test}")
         print(
             f"X_TRAIN: {len(self.x_train)}, X_TEST: {len(self.x_test)}, Y_TRAIN: {len(self.y_train)}, Y_TEST: {len(self.y_test)}")
 
-    def generate_dictionary_for_database_categories(self) -> Dict:
+    def generate_dictionary_for_database_categories(self):
         self.categories_dictionary = {}
-        self.compression_indices_dictionary = {}
+        self.x_train_means = []
 
         progress_bar = trange(len(self.x_train), position=0, leave=True)
 
@@ -88,20 +79,15 @@ class Lzw_Pattern_Recognizer():
                 if category not in self.categories_dictionary:
                     self.categories_dictionary[category] = self.init_code_dictionary(
                     )
-                original_file = open(file_path, "rb").read()
+                original_file = open(file_path, "rb").read()[14:]
                 compressor = Compressor(
                     data=original_file, dictionary=self.categories_dictionary[category], k=10)
                 compressor_response = compressor.run()
                 self.x_train[row][column] = compressor_response["indices"]
+            self.x_train_means.append([mean(self.x_train[row])])
             progress_bar.update(1)
 
         progress_bar.close()
-        self.x_train = self.x_train
-
-        return {
-            "Categories dictionary": self.categories_dictionary,
-            "Compression Indices per image": self.compression_indices_dictionary
-        }
 
 
 lzw_pattern_recognizer = Lzw_Pattern_Recognizer(
@@ -112,4 +98,3 @@ lzw_pattern_recognizer = Lzw_Pattern_Recognizer(
 lzw_pattern_recognizer.split_dataset()
 lzw_pattern_recognizer.generate_dictionary_for_database_categories()
 lzw_pattern_recognizer.generate_classification_results()
-lzw_pattern_recognizer.perform_knn()
