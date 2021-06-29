@@ -10,19 +10,22 @@
 
 ## Introdução
 
-Objetivo do trabalho: Conectar o algoritmo de compressão LZW ao algoritmo k-vizinhos, este utilizado em larga escala para classificar padrões.
+O presente trabalho implementa um reconhecedor de padrões utilizando o **k-vizinhos** (algoritmo de classificação), sendo este baseado no **LZW** (algoritmo de compressão).
 
 ## Metodologia
 
-Utilizou o banco de dados **X**, o qual contém 40 pessoas, cada uma com 10 imagens. O cabeçalho do arquivo de dados foi descartado. O projeto foi implementado através da linguagem Python.
+Para desenvolvimento do projeto, foi utilizado a base de dados [**ORL Database of Faces**](https://www.dropbox.com/s/mnhfhb1i51loknk/orl_faces.zip?dl=0),
+que contém dados de 40 pessoas, cada uma com 10 imagens de sua face.
 
-A imagem de classificação foi obtida de forma aleatória, as utilizadas para treinamento são todas as outras que não são de classificação. 360 treino, 40 classificação. Dado que o banco tem 40 pessoas e 10 imagens por pessoa, 1 imagem para classificação por pessoa e 9 para treinamento.
+Em geral, para a implementação do projeto, o cabeçalho do arquivo de dados foi descartado e a linguagem de programação utilizada foi Python.
 
-Para todos os testes, utilizou-se o intervalo de variacao 9 a 16 para o valor de **k**.
+O banco foi organizado de forma que houvesse diferentes amostras de treino e classificação utilizando a **técnica de validação cruzada**. Dessa forma, a imagem de classificação foi obtida de forma aleatória, as utilizadas para treinamento são todas as outras que não são de classificação. De modo geral, 360 imagens foram utilzadas para treino e 40 para classificação, dado que o banco tem 40 pessoas e 10 imagens por pessoa, resultou em 1 imagem para classificação e 9 para treinamento por pessoa.
 
-O dicionário permaneceu estático durante todo o processo de classificação.
+Na etapa de treinamento, foi gerado um modelo **LZW** (dicionário) para cada categoria (ou seja, pessoa) da base de dados.
 
-A métrica de distância utilizada foi a quantidade de índices do dicionário.
+Para classificação, o **dicionário permaneceu estático** durante todo o processo, sendo a **quantidade de indíces** do dicionário utilizada como métrica de distância.
+
+Durante os testes, utilizou-se o intervalo de variação **9 a 16** para o valor de **k**.
 
 ## Análise de resultados
 
@@ -33,9 +36,7 @@ No Gráfico 1, é apresentado a curva da **razão de acerto** em função da var
   <figcaption>Gráfico 1 - Razão de acerto por K</figcaption>
 </figure>
 
-A taxa de acerto aumenta para números mais altos de **k**. Tendo em vista o gráfico acima, é possível perceber que a taxa de acerto da classificação
-aumenta em função do incremento de **k**. Este comportamento condiz com o esperado, visto que
-quanto maior for o dicionário, mais abrangente este será e consequentemente mais preciso.
+É possível perceber que a taxa de acerto da classificação aumenta em função do incremento de **k**. Este comportamento condiz com o esperado, visto que quanto maior for o dicionário, mais abrangente este será e consequentemente mais preciso.
 
 O Gráfico 2 é referente a curva do **tempo de processamento** do código em função da variação do **k**.
 
